@@ -12,7 +12,7 @@ const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-app.get("/api/v1/tours", (req, res) => {
+const getAllTours = (req, res) => {
     res.status(200).json({
         status: "success",
         results: tours.length,
@@ -20,9 +20,29 @@ app.get("/api/v1/tours", (req, res) => {
             tours,
         },
     });
-});
+};
 
-app.post("/api/v1/tours", (req, res) => {
+const getTour = (req, res) => {
+    const id = req.params.id * 1;
+
+    const tour = tours.find((t) => t.id === id);
+
+    if (!tour) {
+        return res.status(404).json({
+            status: "fail",
+            message: "Invalid ID",
+        });
+    }
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            tour,
+        },
+    });
+};
+
+const postNewTour = (req, res) => {
     const tourID = tours[tours.length - 1].id + 1;
     const newTour = Object.assign({ id: tourID }, req.body);
 
@@ -39,7 +59,10 @@ app.post("/api/v1/tours", (req, res) => {
             });
         }
     );
-});
+};
+
+app.route("/api/v1/tours").get(getAllTours).post(postNewTour);
+app.route("/api/v1/tours/:id").get(getTour);
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
